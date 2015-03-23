@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+puts "--- Beginning DFI commit message formatting checks ---"
+puts
+
+committer = nil
+committxt = nil
+ticketid  = nil
+
+statusok = false
+
+# The git commit message is passed as the first argument:
+File.open(ARGV[0],'r') do |f|
+  while (commitmsg = f.gets)
+    # XXX: text description: C-xxxxxx
+    if m = /([A-Z][A-Z][A-Z]):\s*(.*?):\s*(.*?)\s*$/.match(commitmsg)
+      committer = m[1]
+      committxt = m[2]
+      ticketid = m[3]
+      statusok = true
+    # XXX: text description
+    elsif m = /([A-Z][A-Z][A-Z]):\s*(.*?)\s*$/.match(commitmsg)
+      committer = m[1]
+      committxt = m[2]
+      statusok = true
+    end
+  end
+  # Report check status:
+  if statusok
+    puts ">>>> Commit message format OK!"
+    puts "  Committer ID (initials) -> '#{committer}'."
+    puts "  Commit text             -> '#{committxt}'."
+    puts "  iTop ticket ID          -> '#{ticketid}'" unless ticketid.nil?
+    puts ">>>>"
+  else
+    puts "#######################################################"
+    puts "  Incorrect commit message format! The message format  "
+    puts "  should be                                            "
+    puts "                                                       "
+    puts "        'XXX: text : <ticketID>' or 'XXX: text'        "
+    puts "                                                       "
+    puts "  where XXX is your 3-initial DFI ID.                  "
+    puts "#######################################################"
+    exit(1)
+  end
+  puts
+end
