@@ -13,7 +13,7 @@ statusok = false
 File.open(ARGV[0],'r') do |f|
   while (commitmsg = f.gets)
     # XXX: text description: C-xxxxxx
-    if m = /([A-Z][A-Z][A-Z]):\s*(.*?):\s*(.*?)\s*$/.match(commitmsg)
+    if m = /([A-Z][A-Z][A-Z]):\s*(.*?):\s*([CPRI]-[0-9]+)\s*$/.match(commitmsg)
       committer = m[1]
       committxt = m[2]
       ticketid = m[3]
