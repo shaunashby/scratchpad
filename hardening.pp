@@ -12,19 +12,30 @@ class xen::hardening {
     tag     => [ 'pci' ],
   }
 
+  service { 'sshd': ensure => running, }
+
+  augeas { "sshd_config":
+    context => "/files/etc/ssh/sshd_config",
+    changes => [
+                "set Banner /etc/ssh/banner",
+                "set IgnoreRhosts yes",
+                "set RhostsRSAAuthentication no",
+                "set HostbasedAuthentication no",
+                "set PermitEmptyPasswords no",
+                "set PermitRootLogin no",
+                "set Ciphers aes256-cbc,aes128-cbc",
+                ],
+    notify  => Service["sshd"],
+    require => File['/etc/ssh/banner'],
+  }
+  
   file { '/etc/ssh/sshd_config':
     ensure  => present,
-    source  => 'puppet://xen/etc/ssh/sshd_config',
     group   => 'root',
     mode    => '0600',
     owner   => 'root',
   }
-
-  service { 'sshd':
-    ensure    => running,
-    subscribe => File['/etc/ssh/sshd_config'],
-  }
-
+  
   # Manage shadow passwords:
   exec { 'login.defs PASS_MAX_DAYS':
     command => "/bin/sed -i -e 's/PASS_MAX_DAYS\t99999/PASS_MAX_DAYS   90/' /etc/login.defs",
